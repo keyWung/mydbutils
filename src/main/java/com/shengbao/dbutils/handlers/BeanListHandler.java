@@ -3,7 +3,6 @@ package com.shengbao.dbutils.handlers;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import com.shengbao.dbutils.ResultSetHandler;
 
 public class BeanListHandler<T> implements ResultSetHandler<ArrayList<T>>{
 

@@ -5,15 +5,24 @@ import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.SQLXML;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Arrays;
 
-
+/**
+ * 底层bean处理器
+ * 
+ * @author shengbao
+ *
+ */
 public class BeanProcessor {
+	
 	public static final int COLUMN_NOT_FIND = -1;
 	
 	/**
@@ -28,6 +37,23 @@ public class BeanProcessor {
 		} catch (IntrospectionException e) {
 			e.printStackTrace();
 		}
+		PropertyDescriptor[] pd = info.getPropertyDescriptors();
+		int ii = -1;
+		for (int i = 0; i < pd.length; i++) {
+			if (pd[i].getName().equals("class")) {
+				ii = i;
+				break;
+			}
+		}
+		if (ii >= 0) {
+			int diff = pd.length - ii -1;
+			System.arraycopy(pd, ii + 1, pd, ii, diff);
+			pd[pd.length -1 ] = null;
+		}
+		//TODO
+		for (PropertyDescriptor p : pd) {
+			System.out.println("name" + p.getName());
+		}
 		return info.getPropertyDescriptors();
 	}
 	
@@ -39,6 +65,7 @@ public class BeanProcessor {
 	 * @throws SQLException
 	 */
 	private int[] mapColumnsToPropertys(PropertyDescriptor[] props, ResultSetMetaData rsmd) throws SQLException {
+		
 		int cols = rsmd.getColumnCount();
 		int[] maps = new int[cols];
 		Arrays.fill(maps, COLUMN_NOT_FIND);
@@ -46,16 +73,27 @@ public class BeanProcessor {
 		for (int col = 1; col <= cols; col++) {
 			String colName = rsmd.getColumnName(col);
 			
-			for (int j = 0; j < props.length; j++) {
+			for (int j = 0; j < props.length;j++) {
 				if (colName.equalsIgnoreCase(props[j].getName())) {
 					maps[j] = j;
 				}
 			}
 		}
 		
+		for (int a : maps) {
+			System.out.print(a + " ");
+		}
 		return maps;
 	}
 	
+	/**
+	 * 映射一个bean
+	 * 
+	 * @param rs
+	 * @param clazz
+	 * @return
+	 * @throws SQLException
+	 */
 	public <T> T toBean(ResultSet rs, Class<T> clazz) throws SQLException{
 		//拿到类型的属性描述器
 		PropertyDescriptor[] props = this.getProperDiscriptor(clazz);
@@ -66,6 +104,16 @@ public class BeanProcessor {
 		return this.createBean(rs, clazz, props, rsmd, mapColumnsToPropertys);
 	}
 	
+	/**
+	 * 创建一个bean
+	 * @param rs
+	 * @param clazz
+	 * @param props
+	 * @param rsmd
+	 * @param mctp
+	 * @return
+	 * @throws SQLException
+	 */
 	private <T> T createBean(ResultSet rs, Class<T> clazz, PropertyDescriptor[] props, ResultSetMetaData rsmd, int[] mctp) throws SQLException {
 		T tar = null;
 		try {
@@ -95,6 +143,15 @@ public class BeanProcessor {
 		return tar;
 	}
 	
+	/**
+	 * 将数据库列字段类型转对应java类型
+	 * 
+	 * @param rs
+	 * @param index
+	 * @param propType
+	 * @return
+	 * @throws SQLException
+	 */
 	protected Object processColumn(ResultSet rs, int index, Class<?> propType) throws SQLException {
 		
 		if ( !propType.isPrimitive() && rs.getObject(index) == null ) {
@@ -141,5 +198,57 @@ public class BeanProcessor {
 		}
 
    }
+	
+	/**
+	 * 将javabean 插入数据库
+	 * @return
+	 * @throws SQLException 
+	 */
+	public <T> T beanToRow(Connection conn, Class<?> clazz, T bean) throws SQLException {
+		ResultSet rs = conn.getMetaData().getColumns(null, "%",clazz.getSimpleName().toLowerCase(), "%");
+		ArrayList<String> colNames = new ArrayList<String>(10);
+		while (rs.next()) {
+			 String columnName = rs.getString("COLUMN_NAME");
+			 System.out.println("cname : " + columnName);
+			 colNames.add(columnName);
+		}
+		
+		System.out.println(colNames.size());
+		
+		//拿到类型的属性描述器
+		PropertyDescriptor[] props = this.getProperDiscriptor(clazz);
+		PreparedStatement ps = conn.prepareStatement("insert into user(userid, age, name) values(?, ?, ?)");
+		
+		for (int i = 0; i < props.length; i++) {
+			
+			PropertyDescriptor descriptor = props[i];
+			if (descriptor.getName().equals("class")) {
+				continue;
+			}
+			
+			System.out.println(descriptor.getName());
+			if (colNames.indexOf(descriptor.getName()) == -1) {
+				continue;
+			}
+			int index =  colNames.indexOf(descriptor.getName()) + 1;
+			Method method = descriptor.getReadMethod();
+			
+			Object value = null;
+			try {
+				value = method.invoke(bean);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			//TODO
+			System.out.println("name:" + descriptor.getName() +" value:" + value+  " to set" + " index:" +index );
+			if (value != null) {
+				ps.setObject(index, value);
+				value = null;
+			}
+		}
+		ps.execute();
+		
+		return null;
+	}
 	
 }

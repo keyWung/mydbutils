@@ -1,9 +1,9 @@
 package com.shengbao.dbutils.handlers;
 
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import com.shengbao.dbutils.ResultSetHandler;
 import com.shengbao.dbutils.processor.BasicRowProcessor;
 import com.shengbao.dbutils.processor.RowProcessor;
 
@@ -34,9 +34,8 @@ public class BeanHandler<T> implements ResultSetHandler<T>, ModifierHandler<T> {
 	 * @param bean 插入数据库的目标javabean 对象
 	 */
 	@SuppressWarnings("hiding")
-	public <T> T insert(T bean) throws SQLException {
-		
-		return null;
+	public <T> T insert(Connection conn, T bean) throws SQLException {
+		return rowProcessor.insert(conn,this.type,bean);
 	}
 	
 }

@@ -2,7 +2,6 @@ package com.shengbao.dbutils.handlers;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import com.shengbao.dbutils.ResultSetHandler;
 
 public class MapHanlder<T> implements ResultSetHandler<T>{
 

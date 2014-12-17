@@ -4,7 +4,11 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 import com.shengbao.dbutils.utils.ConnPool;
-
+/**
+ * 测试
+ * @author Administrator
+ *
+ */
 public class TestConnPool {
 
 	/**
