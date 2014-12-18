@@ -48,13 +48,9 @@ public class BeanProcessor {
 		if (ii >= 0) {
 			int diff = pd.length - ii -1;
 			System.arraycopy(pd, ii + 1, pd, ii, diff);
-			pd[pd.length -1 ] = null;
+			pd = Arrays.copyOf(pd, pd.length -1 );
 		}
-		//TODO
-		for (PropertyDescriptor p : pd) {
-			System.out.println("name" + p.getName());
-		}
-		return info.getPropertyDescriptors();
+		return pd;
 	}
 	
 	/**
@@ -65,24 +61,21 @@ public class BeanProcessor {
 	 * @throws SQLException
 	 */
 	private int[] mapColumnsToPropertys(PropertyDescriptor[] props, ResultSetMetaData rsmd) throws SQLException {
-		
 		int cols = rsmd.getColumnCount();
 		int[] maps = new int[cols];
+		
 		Arrays.fill(maps, COLUMN_NOT_FIND);
 		
-		for (int col = 1; col <= cols; col++) {
-			String colName = rsmd.getColumnName(col);
+		for (int col = 0; col < cols; col++) {
+			String colName = rsmd.getColumnName(col+1);
 			
 			for (int j = 0; j < props.length;j++) {
 				if (colName.equalsIgnoreCase(props[j].getName())) {
-					maps[j] = j;
+					maps[col] = j;
 				}
 			}
 		}
 		
-		for (int a : maps) {
-			System.out.print(a + " ");
-		}
 		return maps;
 	}
 	
@@ -121,7 +114,7 @@ public class BeanProcessor {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+	
 		Object value = null;
 		for (int i = 0; i < mctp.length; i++) {
 			if (mctp[i] == COLUMN_NOT_FIND) {
@@ -132,7 +125,6 @@ public class BeanProcessor {
 			PropertyDescriptor pd = props[index];
 			Method setter = pd.getWriteMethod();
 			value = this.processColumn(rs, i+1, pd.getPropertyType());
-			
 			try {
 				setter.invoke(tar, new Object[]{value});
 			} catch (Exception e) {
@@ -239,8 +231,6 @@ public class BeanProcessor {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			//TODO
-			System.out.println("name:" + descriptor.getName() +" value:" + value+  " to set" + " index:" +index );
 			if (value != null) {
 				ps.setObject(index, value);
 				value = null;
