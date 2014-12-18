@@ -8,7 +8,7 @@ import com.shengbao.dbutils.handlers.BeanListHandler;
 import com.shengbao.dbutils.utils.ConnPool;
 /**
  * 测试类 
- * @author Administrator
+ * @author shengbao
  *
  */
 public class TestBeanHandler {
