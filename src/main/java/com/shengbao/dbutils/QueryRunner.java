@@ -9,9 +9,10 @@ import com.shengbao.dbutils.handlers.ResultSetHandler;
 import com.shengbao.dbutils.utils.StatementPool;
 
 /**
- * 查询引擎
+ * 框架引擎  对象类  操作入口类
+ * 集查询和修改操作于一身的类
  * @author shengbao
- *@since 1.0
+ * @since 1.0
  */
 public class QueryRunner {
 	

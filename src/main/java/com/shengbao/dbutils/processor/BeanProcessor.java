@@ -23,6 +23,9 @@ import java.util.Arrays;
  */
 public class BeanProcessor {
 	
+	/**
+	 * 没有映射的标志
+	 */
 	public static final int COLUMN_NOT_FIND = -1;
 	
 	/**

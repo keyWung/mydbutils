@@ -7,6 +7,12 @@ import java.sql.SQLException;
 import com.shengbao.dbutils.processor.BasicRowProcessor;
 import com.shengbao.dbutils.processor.RowProcessor;
 
+/**
+ * Bean处理类 暂时用于转发
+ * @author shengbao
+ *
+ * @param <T>
+ */
 public class BeanHandler<T> implements ResultSetHandler<T>, ModifierHandler<T> {
 	private Class<T> type;//字节码类型
 	

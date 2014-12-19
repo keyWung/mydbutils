@@ -2,7 +2,13 @@ package com.shengbao.dbutils;
 
 import java.sql.DriverManager;
 import java.sql.SQLException;
-
+/**
+ * 暂时数据库配置先放在这里
+ * 后续要加个XML解析器 使用XML存放配置
+ * 
+ * @author shengbao
+ *
+ */
 public class SQLConfiguer {
 	public static final String url = "jdbc:mysql://127.0.0.1:3306/infosys";
 	public static final String username = "root";

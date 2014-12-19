@@ -5,7 +5,7 @@ import java.sql.SQLException;
 
 import com.shengbao.dbutils.utils.ConnPool;
 /**
- * 测试
+ * 测试 连接池的类
  * @author Administrator
  *
  */
